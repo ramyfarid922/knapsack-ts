@@ -7,6 +7,9 @@ export class Packer {
   // For that you will see that the class functions process the data and pass it around
   // to each other instead of trying to mutate class variables.
 
+  // I have wraped each method code in a try catch block to throw ther errors
+  // if the constraints of input are not met
+
   constructor() {}
 
   private static maxOf(val1: number, val2: number): number {
@@ -16,28 +19,40 @@ export class Packer {
   }
 
   static pack(inputFile: string): string {
-    // Packer.prepareSamples() parses the input file path and extracts the test samples into
-    // array of strings each representing a test case
-    let samples: string[] = Packer.prepareSamples(inputFile);
-    // The samples array get passed to Packer.solveSamples() to handle iterating over
-    // each test case and solve each one and returning array of results
-    let results: string[] = Packer.solveSamples(samples);
-    // The returned array of results is joined by newlines into an output string
-    return results.join("\n");
+    try {
+      // Packer.prepareSamples() parses the input file path and extracts the test samples into
+      // array of strings each representing a test case
+      let samples: string[] = Packer.prepareSamples(inputFile);
+      // The samples array get passed to Packer.solveSamples() to handle iterating over
+      // each test case and solve each one and returning array of results
+      let results: string[] = Packer.solveSamples(samples);
+      // The returned array of results is joined by newlines into an output string
+      return results.join("\n");
+    } catch (error) {
+      throw error;
+    }
   }
 
   private static prepareSamples(inputFile: string): string[] {
-    let samples = fs.readFileSync(inputFile).toString();
-    return samples.split("\n");
+    try {
+      let samples = fs.readFileSync(inputFile).toString();
+      return samples.split("\n");
+    } catch (error) {
+      throw error;
+    }
   }
 
   private static solveSamples(samples): string[] {
-    let results: string[] = [];
-    samples.forEach((sample) => {
-      let result: string = Packer.solveSample(sample);
-      results.push(result);
-    });
-    return results;
+    try {
+      let results: string[] = [];
+      samples.forEach((sample) => {
+        let result: string = Packer.solveSample(sample);
+        results.push(result);
+      });
+      return results;
+    } catch (error) {
+      throw error;
+    }
   }
 
   private static solveSample(sample: string): string {
@@ -51,23 +66,22 @@ export class Packer {
 
       // Parse the sample string to obtain capacity and item knowledge
       let sampleParts: string[] = sample.split(":");
-      
 
       capacity = parseInt(sampleParts[0]);
 
       if (capacity > 100) {
-        let error = new ApiError("Max capacity exceeded!")
-        throw error
+        let error = new ApiError("Max capacity exceeded!");
+        throw error;
       }
 
       // Multiplying the capacity by 100 to remove the decimal point
       // because later, we will have to multiply the weights as well
-      capacity = capacity*100
+      capacity = capacity * 100;
 
       let items: string[] = sampleParts[1].trim().split(" ");
       if (items.length > 15) {
-        let error = new ApiError("Max items length exceeded!")
-        throw error
+        let error = new ApiError("Max items length exceeded!");
+        throw error;
       }
 
       // Reset the state arrays from input of previous sample
@@ -81,8 +95,8 @@ export class Packer {
         let weight: number = parseFloat(itemParts[1]);
         let value: number = parseInt(itemParts[2].replace(/[€]/g, ""));
         if (weight > 100 || value > 100) {
-            let error = new ApiError("Max weight/cost exceeded!")
-            throw error
+          let error = new ApiError("Max weight/cost exceeded!");
+          throw error;
         }
         // Notice here that I am multiplying the weight by 100 to remove the fraction
         // to suit the algorithm which works on whole weights problem
@@ -110,8 +124,7 @@ export class Packer {
     var table: number[][] = [];
     let result: number[] = [];
 
-
-    // The next procedure is to fill the a table where we ask ourselves at each 
+    // The next procedure is to fill the a table where we ask ourselves at each
     // specific assumed capacity, what items can we take to have max cost
     // We consider an ascending number of items
     // i.e if we had one item at this capacity, what should we do?
